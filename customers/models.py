@@ -196,11 +196,11 @@ class CustomerTrailer(models.Model):
                 null=True, 
                 related_name='customer_trailer')
 
-    def as_dict(self):
-        return {
-            "id": self.id,
-            "customer": self.customer.id,
-            "epra": self.trailer.epra_no
+    # def as_dict(self):
+    #     return {
+    #         "id": self.id,
+    #         "customer": self.customer.id,
+    #         "epra": self.trailer.epra_no
 
-        }
+    #     }
 

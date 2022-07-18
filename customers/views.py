@@ -184,8 +184,13 @@ class CustomerDriverViewSet(viewsets.ModelViewSet):
     # search_fields = ('company', 'contact_person')
 
     def get_queryset(self):
-        customer_id = 3
+        customer_id = 2
         # customer_id = self.request.user.customer_id.id
+        return CustomerDriver.objects.filter(customer_id=customer_id).prefetch_related(
+            Prefetch('driver',
+            queryset=Driver.objects.all())
+        )
+
         return CustomerDriver.objects.filter(customer_id=customer_id)
 
     def perform_create(self, request):
