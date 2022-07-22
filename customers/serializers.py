@@ -1,3 +1,4 @@
+from asyncore import read
 from attr import fields
 from django.forms import CharField
 from rest_framework import serializers
@@ -47,10 +48,10 @@ class CustomerDriverSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    driver = DriverSerializer()
-    truck = VehicleSerializer()
-    trailer = VehicleSerializer()
-    customer = CustomerSerializer()
+    driver_details = DriverSerializer(source="driver", read_only=True)
+    truck_details = VehicleSerializer(source="truck", read_only=True)
+    trailer_details = VehicleSerializer(source="trailer", read_only=True)
+    customer_details = CustomerSerializer(source="customer",  read_only=True)
 
     class Meta:
         
@@ -58,13 +59,17 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = [
                     'id',
                     'driver',
-                    'trailer', 
-                    'truck', 
+                    'driver_details',
+                    'trailer',
+                    'trailer_details', 
+                    'truck',
+                    'truck_details', 
                     'created_at', 
                     'destination',
                     'order_quantity',
                     'status',
-                    'customer'
+                    'customer',
+                    'customer_details'
                 ]
 
                     

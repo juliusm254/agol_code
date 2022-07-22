@@ -41,7 +41,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import (BulkOrder, Order, 
-                    Vehicle, 
+                    Vehicle,
+                    BulkOrderBalance, 
                     Driver, 
                     Customer, 
                     CustomerDriver,
@@ -54,7 +55,7 @@ from .serializers import (  OrderSerializer,
                             DriverSerializer, 
                             CustomerTruckSerializer,
                             CustomerTrailerSerializer,
-                            BulkOrderSerializer
+                            BulkOrderSerializer,
                             )
 
 
@@ -98,25 +99,71 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     '''Below query passes UserID who created Lead without team line'''
 
+    # def perform_create(self, serializer):
+    #     truck = Vehicle.objects.filter(id=self.request.data['truck']).first()
+    #     trailer = Vehicle.objects.filter(id=self.request.data['trailer']).first()
+    #     driver = Driver.objects.filter(id=self.request.data['driver']).first()
+    #     cust_obj = Customer.objects.filter(id=self.request.user.customer_id.id).first()
+        
+    #     cust_order = Order(
+    #         driver = driver,
+    #         customer_id = cust_obj,
+    #         trailer = trailer,
+    #         truck = truck,
+    #         destination = self.request.data['destination'],
+    #         order_quantity = self.request.data['order_quantity'],
+            
+    #     )
+    #     cust_order.save(self)
+
     def perform_create(self, serializer):
         truck = Vehicle.objects.filter(id=self.request.data['truck']).first()
         trailer = Vehicle.objects.filter(id=self.request.data['trailer']).first()
         driver = Driver.objects.filter(id=self.request.data['driver']).first()
-        cust_obj = Customer.objects.filter(id=self.request.user.customer_id.id).first()
+        # cust_obj = Customer.objects.filter(id=self.request.user.customer_id).first()
+        # truck = Vehicle.objects.get(id=1)
+        # trailer = Vehicle.objects.get(id=1)
+        # driver = Driver.objects.get(id=1)
+        cust_obj = Customer.objects.get(id=3)
+
+        if not cust_obj.bulk_customer:
         
-        cust_order = Order(
-            driver = driver,
-            customer_id = cust_obj,
-            trailer = trailer,
-            truck = truck,
-            destination = self.request.data['destination'],
-            order_quantity = self.request.data['order_quantity'],
-            
-        )
-        cust_order.save(self)
+            cust_order = Order(
+                driver = driver,
+                customer_id = cust_obj.id,
+                trailer = trailer,
+                truck = truck,
+                destination = self.request.data['destination'],
+                order_quantity = self.request.data['order_quantity'],
+                
+            )
+            cust_order.save(self)
+
+        else:
+            print('we got here')
+            try:
+                query = BulkOrderBalance.objects.get(pk=cust_obj.id)
+                order_quantity = 0
+                balance_obj = query
+                balance = balance_obj.quantity
+                if balance > 0:
+                    print(balance)
+                    newquantity = balance - int(order_quantity)
+                    balance_obj.quantity = newquantity
+                    if newquantity > 0:
+                        print(balance_obj.quantity)
+                        balance_obj.save()
+                    else:
+                        print('else in')
+                else:
+                        print('else out')
+
+                
+            except:
+                print('except')
 
     def get_queryset(self):
-        customer_id = '2'
+        customer_id = '3'
         # customer_id = self.request.user.customer_id.id
         queryset = Order.objects.filter(customer_id=customer_id).select_related('driver', 'truck', 'trailer', 'customer' )
         # orders = []
