@@ -20,7 +20,8 @@ class CustomerSerializer(serializers.ModelSerializer):
 class DriverSerializer(serializers.ModelSerializer):
     class Meta:
         model = Driver
-        fields = ['name', 'national_id']
+        # fields = ['name', 'national_id']
+        fields = '__all__'
 
 class VehicleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,23 +29,26 @@ class VehicleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class CustomerTruckSerializer(serializers.ModelSerializer):
+    truck_details = VehicleSerializer(source="truck", read_only=True)
     class Meta:
         model = CustomerTruck
-        fields = '__all__'
+        fields = ['truck','customer_id', 'truck_details', 'registration']
 
 class CustomerTrailerSerializer(serializers.ModelSerializer):
-    trailer = VehicleSerializer()
+    # trailer = VehicleSerializer()
+    trailer_details = VehicleSerializer(source="trailer", read_only=True)
     class Meta:
         model = CustomerTrailer
         
-        fields = ['trailer','customer_id']
+        fields = ['trailer','customer_id', 'trailer_details', 'registration']
 
 
 class CustomerDriverSerializer(serializers.ModelSerializer):  
     driver = DriverSerializer()
     class Meta:
         model = CustomerDriver
-        fields = ['driver', 'customer']
+        # fields = ['driver', 'customer']
+        fields = '__all__'
 
 
 class OrderSerializer(serializers.ModelSerializer):

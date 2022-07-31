@@ -44,6 +44,8 @@ INTERNAL_IPS = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",
     "http://localhost:8081",
+    "http://localhost:5173",
+    "http://localhost:5174",
 ]
 
 # CORS_ORIGIN_WHITELIST = (
@@ -53,6 +55,7 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'contenttype',
+    'x-content-type-options'
 ]
 
 # Application definition
@@ -129,8 +132,9 @@ DATABASES = {
 
 
 AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
     # 'customers.CustomerBackend.CustomerBackend',
-    'accounts.Backend.CustomBackend',
+    # 'accounts.Backend.CustomBackend',
     'django.contrib.auth.backends.ModelBackend'
     
 )
@@ -182,10 +186,11 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# SESSION_COOKIE_DOMAIN = "127.0.0.1"
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=3),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': False,
     'UPDATE_LAST_LOGIN': False,
@@ -215,13 +220,13 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
-REST_FRAMEWORK = {
-    # 'DEFAULT_PERMISSION_CLASSES' : ('rest_framework.permissions.IsAuthenticated', ),
+# REST_FRAMEWORK = {
+#     'DEFAULT_PERMISSION_CLASSES' : ('rest_framework.permissions.IsAuthenticated', ),
 
-    # 'DEFAULT_AUTHENTICATION_CLASSES':  (
-    # # 'rest_framework.authentication.BasicAuthentication',   
-    # # 'rest_framework.authentication.TokenAuthentication',
-    # # 'rest_framework.authentication.SessionAuthentication',
-    # 'rest_framework_simplejwt.authentication.JWTAuthentication',
-    # )
-}
+#     'DEFAULT_AUTHENTICATION_CLASSES':  (
+#     # 'rest_framework.authentication.BasicAuthentication',   
+#     # 'rest_framework.authentication.TokenAuthentication',
+#     # 'rest_framework.authentication.SessionAuthentication',
+#     'rest_framework_simplejwt.authentication.JWTAuthentication',
+#     )
+# }

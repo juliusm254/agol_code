@@ -1,9 +1,10 @@
 from rest_framework import serializers
-from .models import ScannedOrders
+from .models import ScanOrder
+from customers.serializers import VehicleSerializer
 from customers.models import Order
 from .models import SafetyChecklist, Labinspection
 
-class OrdersSerializer(serializers.ModelSerializer):
+class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         read_only_fields = (
@@ -13,10 +14,11 @@ class OrdersSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ChecklistSerializer(serializers.ModelSerializer):
+class SafetySerializer(serializers.ModelSerializer):
+    trailer_details = VehicleSerializer(source="trailer", read_only=True)
     class Meta:
-        model = SafetyChecklist
-        fields = '__all__'
+        model = Order
+        fields = ['id','trailer', 'truck', 'trailer_details']
 
 
 class LabinspectionSerializer(serializers.ModelSerializer):
@@ -25,9 +27,9 @@ class LabinspectionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# class ScannedOrdersSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = ScannedOrders
-#         fields = '__all__'
+class ScanOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ScanOrder
+        fields = '__all__'
 
 

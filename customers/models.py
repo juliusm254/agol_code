@@ -47,31 +47,34 @@ class Order(models.Model):
     SCANNED = 'Scanned'
     STALE = 'Stale'
     REJECTED = 'Rejected'
-    LOADED = 'Loaded'
-    SAFETY = 'Safety'
-    LAB = 'Lab'
-    LABRESULTS = 'Labresults'
-    LOADING = 'Loading'
-    RELEASED = 'Released'
+    
+    # LOADED = 'Loaded'
+    # SAFETY = 'Safety'
+    # LAB = 'Lab'
+    # LABRESULTS = 'Labresults'
+    # LOADING = 'Loading'
+    # RELEASED = 'Released'
     
     ORDERS_STATUS = (
         (PENDING, 'Pending'),
         (SCANNED, 'Scanned'),
-        (REJECTED, 'Rejected'),
-        (SAFETY, 'Safety'),
-        (LAB, 'Lab'),
-        (LABRESULTS, 'Labresults'),
-        (LOADING, 'Loading'),
-        (LOADED, 'Loaded'),
-        (RELEASED, 'Released')
-
+        (REJECTED, 'Rejected'),    
     )
+
+    # TERMINAL_STATUS = (
+    #     (SAFETY, 'Safety'),
+    #     (LAB, 'Lab'),
+    #     (LABRESULTS, 'Labresults'),
+    #     (LOADING, 'Loading'),
+    #     (LOADED, 'Loaded'),
+    #     (RELEASED, 'Released')
+    # )
 
     customer = models.ForeignKey(
         Customer, on_delete=models.CASCADE, related_name='order_customer', null=False)    
     destination = models.CharField(max_length=255)    
     order_quantity = models.IntegerField(null=False)    
-    status = models.CharField(max_length=25, choices=ORDERS_STATUS, default=PENDING)
+    order_status = models.CharField(max_length=25, choices=ORDERS_STATUS, default=PENDING)
     driver = models.ForeignKey(Driver, related_name='order_driver', on_delete=models.CASCADE)
     truck = models.ForeignKey(Vehicle, related_name='order_truck', on_delete=models.CASCADE)
     trailer = models.ForeignKey(Vehicle, related_name='order_trailer', on_delete=models.CASCADE)  
@@ -161,6 +164,10 @@ class OrderDetails(models.Model):
 
 # customer specific trucks
 class CustomerTruck(models.Model):
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['customer', 'truck'], name='unique_customer_truck')
+        ]
     customer = models.ForeignKey(
             Customer, on_delete=models.SET_NULL, null=True)
     registration = models.CharField(max_length=200, null=True)

@@ -9,12 +9,12 @@ from rest_framework import exceptions
 class CustomBackend(ModelBackend):
 
     def authenticate(self, request, username=None, password=None, type=None, **kwargs):
-        print('gets here')
-        print(request)        
-        username = request['username']
-        type = request['type']
-        password = request['password']
-        User = get_user_model().objects.filter(username=username).first()
+        print('gets here in BACKEND!!!!!!')
+        # print(request.POST)        
+        # username = request.POST['username']
+        # # type = request.POST['type']
+        # password = request.POST['password']
+        user = get_user_model().objects.filter(username=username).first()
         # try:
         #     user = User.objects.get(username=username)
         #     if user.check_password(password) is True:
@@ -22,14 +22,14 @@ class CustomBackend(ModelBackend):
         #             return user
         # except User.DoesNotExist:
         #     pass        
-        if User is None:
+        if user is None:
             raise exceptions.AuthenticationFailed("User not Found!")
-        if not User.check_password(password):
+        if not user.check_password(password):
             raise exceptions.AuthenticationFailed("Incorrect is Password")
-        if not User.type == type:
-            raise exceptions.AuthenticationFailed("Incorrect Password or Username")
-        
-        return User
+        # if not user.type == type:
+        #     raise exceptions.AuthenticationFailed("Incorrect Password or Username")
+        print(user)
+        return user
     # def access_token(self):               
     #     return get_tokens_for_user()
 

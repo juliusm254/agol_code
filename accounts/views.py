@@ -1,11 +1,11 @@
-from rest_framework import generics
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
-from django.contrib.auth.models import User
+# from rest_framework import generics
+# from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+# from rest_framework_simplejwt.views import TokenObtainPairView
+# from django.contrib.auth.models import User
 
-from rest_framework.views import APIView
-from django.contrib.auth import authenticate
-from .serializers import UserSerializer
+# from rest_framework.views import APIView
+# from django.contrib.auth import authenticate
+# from .serializers import UserSerializer, OperationsUserSerializer
 
 
 
@@ -24,8 +24,12 @@ from .serializers import UserSerializer
 # class ObtainTokenPairWithColorView(TokenObtainPairView):
 #     serializer_class = MyTokenObtainPairSerializer
 
-class UserCreate(generics.CreateAPIView):
-    serializer_class = UserSerializer
+# class UserCreate(generics.CreateAPIView):
+#     serializer_class = UserSerializer
+
+
+# class OperationsUserCreate(generics.CreateAPIView):
+#     serializer_class = OperationsUserSerializer
 
 
 # from django.contrib.auth import authenticate

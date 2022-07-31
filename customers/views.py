@@ -32,12 +32,10 @@
 from email.policy import default
 from django.db.models import Prefetch, Count, Q
 from django.contrib.auth import authenticate
-from django.http import JsonResponse
-from rest_framework.decorators import api_view, permission_classes
-from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, filters, status
 from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import (BulkOrder, Order, 
@@ -80,13 +78,29 @@ class LoginView(APIView):
     permission_classes = ()
 
     def post(self, request,):
-        user = authenticate(request.data)
+        user = authenticate(username=request.data['username'], password=request.data['password'])
+        print(user)
         if user:
             return Response( get_tokens_for_user(user) )
         else:
             # return Response( get_tokens_for_user(user) )
             return Response({"error": "Wrong Credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class BlacklistTokenUpdateView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = ()
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh_token"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+from django.db.models import F
     
 class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = ()
@@ -96,84 +110,127 @@ class OrderViewSet(viewsets.ModelViewSet):
     # pagination_class =  LeadPagination
     # filter_backends = (filters.SearchFilter,)
     # search_fields = ('company', 'contact_person')
+    
+    def get_queryset(self):
+        # customer_id = '3'
+        # # customer_id = self.request.user.customer_id.id
+        # queryset = Order.objects.filter(customer_id=customer_id).select_related('driver', 'truck', 'trailer', 'customer' )
+        # # orders = []
 
-    '''Below query passes UserID who created Lead without team line'''
+        # # for order in queryset:
+        # #     # orders.append({'id': order.id, 'customer': order.customer, 'driver': order.driver, 'created_at': order.created_at, 'modified_at': order.modified_at,'destination': order.destination, 'order_quantity': order.order_quantity, 'status': order.status, 'truck': order.truck, 'trailer': order.trailer})
+        # #     orders.append({'id': order.id, 'driver': order.driver, })
 
-    # def perform_create(self, serializer):
-    #     truck = Vehicle.objects.filter(id=self.request.data['truck']).first()
-    #     trailer = Vehicle.objects.filter(id=self.request.data['trailer']).first()
-    #     driver = Driver.objects.filter(id=self.request.data['driver']).first()
-    #     cust_obj = Customer.objects.filter(id=self.request.user.customer_id.id).first()
-        
-    #     cust_order = Order(
-    #         driver = driver,
-    #         customer_id = cust_obj,
-    #         trailer = trailer,
-    #         truck = truck,
-    #         destination = self.request.data['destination'],
-    #         order_quantity = self.request.data['order_quantity'],
-            
-    #     )
-    #     cust_order.save(self)
+        # # print(orders)     
+        # return queryset
+        pass
 
     def perform_create(self, serializer):
-        truck = Vehicle.objects.filter(id=self.request.data['truck']).first()
-        trailer = Vehicle.objects.filter(id=self.request.data['trailer']).first()
-        driver = Driver.objects.filter(id=self.request.data['driver']).first()
-        # cust_obj = Customer.objects.filter(id=self.request.user.customer_id).first()
-        # truck = Vehicle.objects.get(id=1)
-        # trailer = Vehicle.objects.get(id=1)
-        # driver = Driver.objects.get(id=1)
-        cust_obj = Customer.objects.get(id=3)
+        # truck = Vehicle.objects.filter(id=self.request.data['truck']).first()
+        # trailer = Vehicle.objects.filter(id=self.request.data['trailer']).first()
+        # driver = Driver.objects.filter(id=self.request.data['driver']).first()
+        # cust_obj = Customer.objects.get(id=self.request.user.customer_id.id)
+        truck = Vehicle.objects.get(id=1)
+        trailer = Vehicle.objects.get(id=1)
+        driver = Driver.objects.get(id=1)
+        cust_obj = Customer.objects.get(id=1)
+        print(cust_obj)
+        destination = self.request.data['destination'],
+        order_quantity = self.request.data['order_quantity']
 
         if not cust_obj.bulk_customer:
         
             cust_order = Order(
                 driver = driver,
-                customer_id = cust_obj.id,
+                customer = cust_obj,
                 trailer = trailer,
                 truck = truck,
-                destination = self.request.data['destination'],
-                order_quantity = self.request.data['order_quantity'],
+                destination = destination,
+                order_quantity = order_quantity,
                 
             )
-            cust_order.save(self)
+            cust_order.save()
 
         else:
-            print('we got here')
-            try:
-                query = BulkOrderBalance.objects.get(pk=cust_obj.id)
-                order_quantity = 0
-                balance_obj = query
-                balance = balance_obj.quantity
-                if balance > 0:
-                    print(balance)
-                    newquantity = balance - int(order_quantity)
-                    balance_obj.quantity = newquantity
-                    if newquantity > 0:
-                        print(balance_obj.quantity)
-                        balance_obj.save()
-                    else:
-                        print('else in')
-                else:
-                        print('else out')
+            # print('we got here')
+            # try:
+            #     # query = BulkOrderBalance.objects.get(customer_id=1)
+            #     query = BulkOrderBalance.objects.get(customer_id=cust_obj.id)
+            #     # order_quantity = self.request.data['order_quantity']
+            #     balance_obj = query
+            #     balance = balance_obj.quantity
+            #     if balance > 0:
+            #         print(balance)
+            #         newquantity = balance - int(order_quantity)
+            #         balance_obj.quantity = newquantity
+            #         if newquantity > 0:
+            #             print(balance_obj.quantity)
+            #             balance_obj.save()
+            #         else:
+            #             print('else in')
+            #     else:
+            #             print('else out')
 
                 
-            except:
-                print('except')
+            # except:
+            #     print('except')
+
+            '''New Code To be reviewed'''
+
+            print('we got here')
+            balance_obj = BulkOrderBalance.objects.filter(customer_id=cust_obj.id)
+            # order_quantity = self.request.data['order_quantity']
+            balance_obj.update(quantity=F('quantity') - order_quantity)
+
+
+
+                
+
+            #     if balance > 0:
+            #         print(balance)
+            #         newquantity = balance - int(order_quantity)
+            #         balance_obj.quantity = newquantity
+            #         if newquantity > 0:
+            #             print(balance_obj.quantity)
+            #             balance_obj.save()
+            #         else:
+            #             print('else in')
+            #     else:
+            #             print('else out')
+
+                
+            # except:
+            #     print('except')
+
+
+class BulkOrderViewSet(viewsets.ModelViewSet):
+    # permission_classes = ()
+    # permission_classes = [IsAuthenticated,]
+    serializer_class = BulkOrderSerializer
+    # queryset = Order.objects.all()
+    # pagination_class =  LeadPagination
+    # filter_backends = (filters.SearchFilter,)
+    # search_fields = ('company', 'contact_person')
+
+    '''Below query passes UserID who created Lead without team line'''
+
+    def perform_create(self, serializer):
+        print(self)
+        cust_obj = Customer.objects.get(id=self.request.data['customer']).id
+        
+        cust_order = BulkOrder(
+            customer_id = cust_obj,
+            description = self.request.data['description'],
+            quantity = self.request.data['quantity'],
+            
+        )
+        print('gets here pre save perform_create in view')
+        cust_order.save(self)
 
     def get_queryset(self):
-        customer_id = '3'
-        # customer_id = self.request.user.customer_id.id
-        queryset = Order.objects.filter(customer_id=customer_id).select_related('driver', 'truck', 'trailer', 'customer' )
-        # orders = []
+        customer_id = self.request.user.customer_id.id
+        return BulkOrderBalance.objects.filter(customer_id=customer_id)
 
-        # for order in queryset:
-        #     # orders.append({'id': order.id, 'customer': order.customer, 'driver': order.driver, 'created_at': order.created_at, 'modified_at': order.modified_at,'destination': order.destination, 'order_quantity': order.order_quantity, 'status': order.status, 'truck': order.truck, 'trailer': order.trailer})
-        #     orders.append({'id': order.id, 'driver': order.driver, })
-
-        # print(orders)     
-        return queryset
 
 class CustomerViewSet(viewsets.ModelViewSet):
     permission_classes = ()
@@ -231,8 +288,8 @@ class CustomerDriverViewSet(viewsets.ModelViewSet):
     # search_fields = ('company', 'contact_person')
 
     def get_queryset(self):
-        customer_id = 2
-        # customer_id = self.request.user.customer_id.id
+        # customer_id = 2
+        customer_id = self.request.user.customer_id.id
         return CustomerDriver.objects.filter(customer_id=customer_id).prefetch_related(
             Prefetch('driver',
             queryset=Driver.objects.all())
@@ -275,8 +332,8 @@ class CustomerTruckViewSet(viewsets.ModelViewSet):
     serializer_class = CustomerTruckSerializer    
 
     def get_queryset(self):
-        customer_id = 3
-        # customer_id = self.request.user.customer_id.id
+        # customer_id = 3
+        customer_id = self.request.user.customer_id.id
         return CustomerTruck.objects.filter(customer_id=customer_id)
 
     def perform_create(self, request):
@@ -300,8 +357,8 @@ class CustomerTrailerViewSet(viewsets.ModelViewSet):
         
 
     def get_queryset(self):
-        customer_id = '2'
-        # customer_id = self.request.user.customer_id.id
+        # customer_id = '2'
+        customer_id = self.request.user.customer_id.id
         return CustomerTrailer.objects.filter(customer_id=customer_id).prefetch_related(
             Prefetch('trailer',
             queryset=Vehicle.objects.all())
@@ -319,42 +376,4 @@ class CustomerTrailerViewSet(viewsets.ModelViewSet):
             trailer = obj
         )        
         cust_trailer.save(self)
-
-
-class BulkOrderViewSet(viewsets.ModelViewSet):
-    # permission_classes = ()
-    # permission_classes = [IsAuthenticated,]
-    serializer_class = BulkOrderSerializer
-    # queryset = Order.objects.all()
-    # pagination_class =  LeadPagination
-    # filter_backends = (filters.SearchFilter,)
-    # search_fields = ('company', 'contact_person')
-
-    '''Below query passes UserID who created Lead without team line'''
-
-    def perform_create(self, serializer):
-        print(self)
-        cust_obj = Customer.objects.get(id=self.request.data['customer']).id
-        
-        cust_order = BulkOrder(
-            customer_id = cust_obj,
-            description = self.request.data['description'],
-            quantity = self.request.data['quantity'],
-            
-        )
-        print('gets here pre save perform_create in view')
-        cust_order.save(self)
-
-    def get_queryset(self):
-        # customer_id = self.request.user.customer_id.id
-        # queryset = Order.objects.filter(customer_id=customer_id).select_related('driver', 'truck','trailer')
-
-        # orders = []
-
-        # for order in queryset:
-        #     orders.append({'id': order.id, 'customer_id': order.customer_id.name, 'driver': order.driver.name, 'created_at': order.created_at, 'modified_at': order.modified_at,'destination': order.destination, 'order_quantity': order.order_quantity, 'status': order.status, 'truck': order.truck.registration, 'trailer': order.trailer.registration})
-               
-        # return(orders)
-        pass
-
         

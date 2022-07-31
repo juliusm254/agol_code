@@ -3,6 +3,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 from .views import (OrderViewSet,
+                    BlacklistTokenUpdateView,
                     CustomerTrailerViewSet,
                     CustomerViewSet, 
                     VehicleViewSet, 
@@ -25,6 +26,7 @@ router.register('bulk-order', BulkOrderViewSet, basename='bulk-order')
 urlpatterns = [
     # path('', include(router.urls)),
     path("login/", LoginView.as_view(), name="login"),
+    
     # path("order/", views.get_orders, name="get_orders"),
     # path('customer-trailer/', views.CustomerTrailerListView.as_view(), name='customer-trailer')
 
