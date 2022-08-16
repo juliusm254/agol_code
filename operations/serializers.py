@@ -4,15 +4,6 @@ from customers.serializers import VehicleSerializer, DriverSerializer, CustomerS
 from customers.models import Order
 from .models import SafetyChecklist, Labinspection, SafetyChecklistQuestion
 
-# class OrderSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Order
-#         read_only_fields = (
-#             "created_at",
-#             "created_by",
-#         ),
-#         fields = '__all__'
-
 
 class SafetyChecklistSerializer(serializers.ModelSerializer):
     trailer_details = VehicleSerializer(source="trailer", read_only=True)
@@ -25,9 +16,14 @@ class SafetyChecklistSerializer(serializers.ModelSerializer):
 
 
 class LabinspectionSerializer(serializers.ModelSerializer):
+    trailer_details = VehicleSerializer(source="trailer", read_only=True)
+    truck_details = VehicleSerializer(source="truck", read_only=True)
+    
+    
     class Meta:
-        model = Labinspection
-        fields = '__all__'
+        model = Order
+        fields = ['id', 'truck', 'truck_details', 'trailer', 'trailer_details']
+
 
 
 class ScanOrderSerializer(serializers.ModelSerializer):
@@ -38,7 +34,7 @@ class ScanOrderSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Order
-        fields = fields = [
+        fields = [
                     'id',
                     'driver_details',
                     'trailer_details',
@@ -62,3 +58,18 @@ class SafetyChecklistQuestionSerializer(serializers.ModelSerializer):
         fields = ['id', 'question_desc']
 
 
+class OrderSerializer(serializers.ModelSerializer):
+    driver_details = DriverSerializer(source="driver", read_only=True)
+    truck_details = VehicleSerializer(source="truck", read_only=True)
+    trailer_details = VehicleSerializer(source="trailer", read_only=True)
+    # customer_details = CustomerSerializer(source="customer",  read_only=True)
+    
+
+
+    class Meta:
+        model = Order
+        read_only_fields = (
+            "created_at",
+            "created_by",
+        ),
+        fields = '__all__'

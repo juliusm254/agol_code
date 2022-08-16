@@ -5,7 +5,8 @@ from django.urls import path, include
 from .views import (LoginView, 
                     ScanOrder, 
                     LabInspectionListCreateAPIView,
-                    SafetyCheckListCreateAPIView, 
+                    SafetyCheckListCreateAPIView,
+                    OrderDetailView, 
                     SafetyCheckListQuestionCreateAPIView, 
                     SafetyCheckListDetailAPIView)
 
@@ -25,6 +26,8 @@ urlpatterns = [
     path('checklist/<int:pk>/', SafetyCheckListDetailAPIView.as_view(), name="detail-checklist"),
     path('checklist-questions/', SafetyCheckListQuestionCreateAPIView.as_view(), name="checklistquestions"),
     path('lab-inspection/', LabInspectionListCreateAPIView.as_view(), name="lab-inspection"),
+    path('order/<int:pk>/', OrderDetailView.as_view(), name="order_details"),
+    
     # path('order-new/<int:pk>/',views.OrderUpdate.as_view()),
     # path('order-new/<int:pk>/',views.OrderUpdate.as_view()),
     

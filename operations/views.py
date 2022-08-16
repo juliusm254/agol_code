@@ -1,6 +1,7 @@
 import json
 from multiprocessing import context
 from urllib import request
+from django.core.exceptions import ImproperlyConfigured
 from django.http import Http404
 from django.shortcuts import render
 from rest_framework import viewsets, filters, status, generics
@@ -13,9 +14,11 @@ from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 from .models import Order, SafetyChecklist, Labinspection, SafetyChecklistQuestion
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import SafetyChecklistSerializer,ScanOrderSerializer, SafetyChecklistQuestionSerializer, LabinspectionSerializer
-from customers.serializers import OrderSerializer
+from .serializers import SafetyChecklistSerializer,ScanOrderSerializer, SafetyChecklistQuestionSerializer, LabinspectionSerializer, OrderSerializer
+# from customers.serializers import OrderSerializer
 from django.contrib.auth import authenticate
+from django.views.generic.list import ListView
+from django.views.generic.detail import DetailView
 
 def get_tokens_for_user(user):
     
@@ -48,16 +51,27 @@ class LoginView(APIView):
 
 
 
-class OrderViewSet(viewsets.ModelViewSet):
-    permission_classes = ()
-    serializer_class = OrderSerializer
-    # queryset = Order.objects.all()
-    # pagination_class =  LeadPagination
-    # filter_backends = (filters.SearchFilter,)
-    # search_fields = ('status')
-    def get_queryset(self):
-        # print(self.request.data)
-        pass
+
+class OrderDetailView(APIView):
+    serializer_class = OrderSerializer    
+
+    model = Order
+
+    def get(self, request, pk=None):
+        print(pk)
+        queryset = Order.objects.get(id=pk)
+        serializer = OrderSerializer(queryset)
+        print(serializer.data)
+        return Response(serializer.data)
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     order = Order.objects.get(pk = self.kwargs['pk'])
+
+    #     if not order:
+    #         raise Http404
+
+    #     # continue with the rest of the method populating the context
+    #     return context
 
 # class OrderDetailAPIView(
 #     # UserQuerySetMixin, 
@@ -192,6 +206,7 @@ class LabinspectionViewSet(viewsets.ModelViewSet):
 class LabInspectionListCreateAPIView(generics.ListCreateAPIView):
     model = Labinspection
     serializer_class = LabinspectionSerializer
+    queryset = Order.objects.filter(order_status='SAFETY')
 
 
     def perform_create(self, serializer):
