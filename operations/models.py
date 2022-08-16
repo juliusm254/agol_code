@@ -5,9 +5,13 @@ from django.db import models
 from django.forms import ChoiceField
 from customers.models import Order, Customer
 
-# class TerminalStatus(models.Model):
-#     scan
+# class OrderTerminalStatus(models.Model):
 
+#     order = models.ForeignKey(Order, on_delete=models.CASCADE)
+#     status = models.CharField(Null=True, default=, max_length=25, choices=TERMINAL_STATUS)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     modified_at = models.DateTimeField(auto_now=True) 
+    
 class ScanOrder(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     # customer_id = models.ForeignKey(Customer, related_name='id', on_delete=models.CASCADE)

@@ -126,14 +126,14 @@ class OrderViewSet(viewsets.ModelViewSet):
         pass
 
     def perform_create(self, serializer):
-        # truck = Vehicle.objects.filter(id=self.request.data['truck']).first()
-        # trailer = Vehicle.objects.filter(id=self.request.data['trailer']).first()
-        # driver = Driver.objects.filter(id=self.request.data['driver']).first()
-        # cust_obj = Customer.objects.get(id=self.request.user.customer_id.id)
-        truck = Vehicle.objects.get(id=1)
-        trailer = Vehicle.objects.get(id=1)
-        driver = Driver.objects.get(id=1)
-        cust_obj = Customer.objects.get(id=1)
+        truck = Vehicle.objects.filter(id=self.request.data['truck']).first()
+        trailer = Vehicle.objects.filter(id=self.request.data['trailer']).first()
+        driver = Driver.objects.filter(id=self.request.data['driver']).first()
+        cust_obj = Customer.objects.get(id=self.request.user.customer_id.id)
+        # truck = Vehicle.objects.get(id=1)
+        # trailer = Vehicle.objects.get(id=1)
+        # driver = Driver.objects.get(id=1)
+        # cust_obj = Customer.objects.get(id=1)
         print(cust_obj)
         destination = self.request.data['destination'],
         order_quantity = self.request.data['order_quantity']

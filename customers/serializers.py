@@ -71,7 +71,7 @@ class OrderSerializer(serializers.ModelSerializer):
                     'created_at', 
                     'destination',
                     'order_quantity',
-                    'status',
+                    'order_status',
                     'customer',
                     'customer_details'
                 ]

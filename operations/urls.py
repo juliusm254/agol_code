@@ -1,36 +1,31 @@
 from django import views
 from django.urls import path, include
 
-from rest_framework.routers import DefaultRouter, SimpleRouter
-from .views import LoginView
+# from rest_framework.routers import DefaultRouter, SimpleRouter
+from .views import (LoginView, 
+                    ScanOrder, 
+                    LabInspectionListCreateAPIView,
+                    SafetyCheckListCreateAPIView, 
+                    SafetyCheckListQuestionCreateAPIView, 
+                    SafetyCheckListDetailAPIView)
 
 # from accounts.views import UserCreate
 
-from .views import OrderViewSet, SafetyViewSet, ChecklistViewSet, ScanOrderViewset
+# from .views import OrderViewSet, ScanOrderViewset
 
-
-router = DefaultRouter()
-router.register('order', OrderViewSet, basename='order')
-router.register('scan-order', ScanOrderViewset, basename='scan-order')
-router.register('safety', SafetyViewSet, basename='safety')
-router.register('check-list', ChecklistViewSet, basename='check-list')
-
-
-
-# checklist_list_view = ChecklistViewSet.as_view({
-#     "get": "list",
-#     "post": "create"
-# })
 
 
 urlpatterns = [    
     
-    # path('', include(router.urls)),
+    # path('', include(**args, **kwargs).urls),
     path("login/", LoginView.as_view(), name="login"),
+    path("scan-order/<int:pk>/", ScanOrder.as_view(), name="scan-order"),
     # path("users/", UserCreate.as_view(), name="user_create"),
-    # path('checklist/<int:pk>/',views.checklist),
+    path('checklist/', SafetyCheckListCreateAPIView.as_view(), name="check-list"),
+    path('checklist/<int:pk>/', SafetyCheckListDetailAPIView.as_view(), name="detail-checklist"),
+    path('checklist-questions/', SafetyCheckListQuestionCreateAPIView.as_view(), name="checklistquestions"),
+    path('lab-inspection/', LabInspectionListCreateAPIView.as_view(), name="lab-inspection"),
+    # path('order-new/<int:pk>/',views.OrderUpdate.as_view()),
     # path('order-new/<int:pk>/',views.OrderUpdate.as_view()),
     
 ]
-
-urlpatterns += router.urls

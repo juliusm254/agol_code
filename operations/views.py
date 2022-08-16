@@ -3,18 +3,17 @@ from multiprocessing import context
 from urllib import request
 from django.http import Http404
 from django.shortcuts import render
-from rest_framework import viewsets, filters, status
+from rest_framework import viewsets, filters, status, generics
 from rest_framework.decorators import api_view
 from django.shortcuts import render, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.views.generic import View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
-from .models import Order, SafetyChecklist, Labinspection
+from .models import Order, SafetyChecklist, Labinspection, SafetyChecklistQuestion
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import SafetySerializer, LabinspectionSerializer
+from .serializers import SafetyChecklistSerializer,ScanOrderSerializer, SafetyChecklistQuestionSerializer, LabinspectionSerializer
 from customers.serializers import OrderSerializer
 from django.contrib.auth import authenticate
 
@@ -59,89 +58,33 @@ class OrderViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # print(self.request.data)
         pass
-   
-    
+
+# class OrderDetailAPIView(
+#     # UserQuerySetMixin, 
+#     # StaffEditorPermissionMixin,
+#     generics.RetrieveAPIView):
+#     queryset = Order.objects.all()
+#     serializer_class = OrderSerializer
+#     lookup_field = 'pk'
 
 
-    # def perform_update(self,serializer):  
-
-    #     print(request)      
-    #     serializer.save(status='Scanned')
-    #     return self.queryset.filter(status='Pending')
-
-    
-
-    # def partial_update(self, request, *args, **kwargs):
-    #     instance = self.queryset.get(pk=kwargs.get('pk'))
-    #     serializer = self.serializer_class(instance, data=request.data, partial=True)
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
-    #     return Response(serializer.data)
 
 
-# def order_update(request, pk):
-#     req = request.body.decode('utf-8')
-#     data = json.loads(req)
-#     print(pk)
-#     order = get_object_or_404(Order, id=pk)
-#     order_update = order(
-#         status=data['status']
-#     )
-#     order_update.save()
-#     return Response(status=201)
-
-
-# @csrf_exempt
-# def order_update(request, pk):    
-#     req = request.body.decode('utf-8')
-#     data = json.loads(req)
-#     print(pk)
-#     print(data)
-#     order = get_object_or_404(Order, id=pk)
-#     order = Order(
-#         status=data['status']
-#     )
-#     order.save()
-#     # return request.queryset.
-#     return Response(status=201)
-
-class ScanOrderViewset(viewsets.ModelViewSet):
+# class ScanOrderViewset(viewsets.ModelViewSet):
+class ScanOrder(generics.UpdateAPIView):
     permission_classes = ()
-    model = Order
-    serializer_class = OrderSerializer  
-    # queryset = Order.objects.all()
-    def get_queryset(self):
-        # print(self.request.data)
-        pass
 
-    def update(self, request, pk=None):
-        req = request.body.decode('utf-8')
-        data = json.loads(req)
-        order = get_object_or_404(Order, id=pk)
-        serializer = self.serializer_class(order, data, partial=True)
-        
-        # Improver Validation for already processed orders 
-        if order.status == data['status']:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        else:
-           
-            order = Order(
-                status=data['status']
-            )
-            serializer.is_valid(raise_exception=True)
+    def put(self, request, pk=None):
+        data = json.loads(request.body.decode('utf-8'))
+        instance = get_object_or_404(Order, id=pk)
+        serializer = ScanOrderSerializer(instance, data=data)
+        # if instance.order_status == data['order_status']:
+        #     return Response(serializer.errors, status=400)
+        # else:
+        if serializer.is_valid(raise_exception=True):
             serializer.save()
-            # return request.queryset.
-            return Response(serializer.data)
-
-
-
-class SafetyViewSet(viewsets.ModelViewSet):
-       
-    serializer_class = SafetySerializer
-    queryset = Order.objects.all()
-    def get_queryset(self):
-        # print(self.request.data)
-        return self.queryset.filter(status='Scanned')
+            return Response(serializer.data, status=200)
+        return Response(serializer.errors, status=400)
 
 
 @api_view(['POST'])
@@ -167,6 +110,18 @@ class OrderUpdate(UpdateView):
     model = Order
     fields = ['status']
 
+    def order_update(request, pk):    
+        req = request.body.decode('utf-8')
+        data = json.loads(req)
+        print(pk)
+        print(data)
+        order = Order(
+            status=data['status']
+        )
+        order.save()
+        # return request.queryset.
+        return Response(status=201)
+
 # @api_view(['PUT'])
 # def order_update(request, pk):    
 #     req = request.body.decode('utf-8')
@@ -180,14 +135,49 @@ class OrderUpdate(UpdateView):
 #     # return request.queryset.
 #     return Response(status=201)
 
-class ChecklistViewSet(viewsets.ModelViewSet):
+class SafetyCheckListQuestionCreateAPIView(generics.ListCreateAPIView):
     
-    # serializer_class = ChecklistSerializer
-    queryset = SafetyChecklist.objects.all()
+    serializer_class = SafetyChecklistQuestionSerializer
+    queryset = SafetyChecklistQuestion.objects.all()
     # def get_queryset(self):
     #     # print(self.request.data)
     #     return self.queryset
-   
+
+
+class SafetyCheckListCreateAPIView(generics.ListCreateAPIView):
+    
+    serializer_class = SafetyChecklistSerializer
+    queryset = Order.objects.filter(order_status='Scanned')
+    # lookup_field = 'pk'
+    # def get_queryset(self):
+    #     # print(self.request.data)
+    #     return self.queryset
+
+    def perform_create(self, serializer):
+        print(self.request.data['order'])
+        dList = self.request.data['questions']
+        order = Order.objects.get(id=self.request.data['order'])
+        for index in range(len(dList)):
+            questions_values_list=list(dList[index].values())
+            # print(someweird[0])
+            # print('Datatype : ',type(someweird))
+            order = Order.objects.get(id=self.request.data['order'])
+            checklist_choice = questions_values_list[2]
+            question = SafetyChecklistQuestion.objects.get(id=questions_values_list[0])
+            SafetyChecklist.objects.create(order=order, checklist_choice=checklist_choice, question=question)
+            order.order_status = 'SAFETY'
+            order.save()
+            
+
+class SafetyCheckListDetailAPIView(generics.RetrieveAPIView):
+    
+    serializer_class = SafetyChecklistSerializer
+    queryset = Order.objects.filter(order_status='Scanned')
+    lookup_field = 'pk'
+    
+
+
+
 class LabinspectionViewSet(viewsets.ModelViewSet):
     
     serializer_class = LabinspectionSerializer
@@ -198,6 +188,13 @@ class LabinspectionViewSet(viewsets.ModelViewSet):
    
             
 
-    
-    
+
+class LabInspectionListCreateAPIView(generics.ListCreateAPIView):
+    model = Labinspection
+    serializer_class = LabinspectionSerializer
+
+
+    def perform_create(self, serializer):
+        print(self.request.data)
+
         

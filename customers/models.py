@@ -47,28 +47,26 @@ class Order(models.Model):
     SCANNED = 'Scanned'
     STALE = 'Stale'
     REJECTED = 'Rejected'
-    
-    # LOADED = 'Loaded'
-    # SAFETY = 'Safety'
-    # LAB = 'Lab'
-    # LABRESULTS = 'Labresults'
-    # LOADING = 'Loading'
-    # RELEASED = 'Released'
+    SAFETY = 'Safety'
+    LAB = 'Lab'
+    LABRESULTS = 'Labresults'
+    LOADING = 'Loading'
+    LOADED = 'Loaded'
+    RELEASED = 'Released'
+    CLOSED = 'Closed'
     
     ORDERS_STATUS = (
         (PENDING, 'Pending'),
         (SCANNED, 'Scanned'),
-        (REJECTED, 'Rejected'),    
+        (REJECTED, 'Rejected'),
+        (SAFETY, 'Safety'),
+        (LAB, 'Lab'),
+        (LABRESULTS, 'Labresults'),
+        (LOADING, 'Loading'),
+        (LOADED, 'Loaded'),
+        (RELEASED, 'Released'),
+        (CLOSED, 'Closed'),
     )
-
-    # TERMINAL_STATUS = (
-    #     (SAFETY, 'Safety'),
-    #     (LAB, 'Lab'),
-    #     (LABRESULTS, 'Labresults'),
-    #     (LOADING, 'Loading'),
-    #     (LOADED, 'Loaded'),
-    #     (RELEASED, 'Released')
-    # )
 
     customer = models.ForeignKey(
         Customer, on_delete=models.CASCADE, related_name='order_customer', null=False)    
