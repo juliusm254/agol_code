@@ -12,9 +12,9 @@ from rest_framework.views import APIView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
-from .models import Order, SafetyChecklist, Labinspection, SafetyChecklistQuestion
+from .models import Order, SafetyChecklist, Labinspection, SafetyChecklistQuestion, LabResults
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import SafetyChecklistSerializer,ScanOrderSerializer, SafetyChecklistQuestionSerializer, LabinspectionSerializer, OrderSerializer
+from .serializers import LabResultsSerializer, SafetyChecklistSerializer,ScanOrderSerializer, SafetyChecklistQuestionSerializer, LabinspectionSerializer, OrderSerializer
 # from customers.serializers import OrderSerializer
 from django.contrib.auth import authenticate
 from django.views.generic.list import ListView
@@ -136,18 +136,6 @@ class OrderUpdate(UpdateView):
         # return request.queryset.
         return Response(status=201)
 
-# @api_view(['PUT'])
-# def order_update(request, pk):    
-#     req = request.body.decode('utf-8')
-#     data = json.loads(req)
-#     print(pk)
-#     print(data)
-#     order = Order(
-#         status=data['status']
-#     )
-#     order.save()
-#     # return request.queryset.
-#     return Response(status=201)
 
 class SafetyCheckListQuestionCreateAPIView(generics.ListCreateAPIView):
     
@@ -168,13 +156,10 @@ class SafetyCheckListCreateAPIView(generics.ListCreateAPIView):
     #     return self.queryset
 
     def perform_create(self, serializer):
-        print(self.request.data['order'])
         dList = self.request.data['questions']
         order = Order.objects.get(id=self.request.data['order'])
         for index in range(len(dList)):
             questions_values_list=list(dList[index].values())
-            # print(someweird[0])
-            # print('Datatype : ',type(someweird))
             order = Order.objects.get(id=self.request.data['order'])
             checklist_choice = questions_values_list[2]
             question = SafetyChecklistQuestion.objects.get(id=questions_values_list[0])
@@ -204,12 +189,47 @@ class LabinspectionViewSet(viewsets.ModelViewSet):
 
 
 class LabInspectionListCreateAPIView(generics.ListCreateAPIView):
-    model = Labinspection
     serializer_class = LabinspectionSerializer
     queryset = Order.objects.filter(order_status='SAFETY')
 
 
     def perform_create(self, serializer):
         print(self.request.data)
+        order = Order.objects.get(id=self.request.data['order'])
+        pressure = self.request.data['truck_pressure']
+        oxygen = self.request.data['oxygen_content']
+        methane = self.request.data['methane_content']
+        order.order_status = 'LAB'
+        order.save()
+        return serializer.save(order=order, pressure=pressure, oxygen=oxygen, methane=methane)
 
-        
+class LabResultsListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = LabinspectionSerializer
+    queryset = Order.objects.filter(order_status='LAB')
+
+    # def get(self, pk, *args, **kwargs):
+        # print(self.request.data)
+        # print(pk)
+
+
+    def perform_create(self, serializer):
+        print(self.request.data)
+        # order = Order.objects.get(id=self.request.data['order'])
+        # pressure = self.request.data['truck_pressure']
+        # oxygen = self.request.data['oxygen_content']
+        # methane = self.request.data['methane_content']
+        # order.order_status = 'LAB'
+        # order.save()
+        # return serializer.save(order=order, pressure=pressure, oxygen=oxygen, methane=methane)
+
+class LabResultsDetailView(APIView):
+    serializer_class = LabResultsSerializer    
+
+    model = Labinspection
+
+    def get(self, request, pk=None):
+        print(pk)
+        queryset = Labinspection.objects.filter(order_id=pk).first()
+        serializer = LabResultsSerializer(queryset)
+        print(serializer.data)        
+        return Response(serializer.data)     

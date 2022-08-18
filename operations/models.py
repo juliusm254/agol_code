@@ -57,4 +57,9 @@ class Labinspection(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     # created_by = models.DateTimeField(auto_now_add=True)
 
-# Create your models here.
+class LabResults(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    vent = models.BooleanField(null=False, default=False)
+    seal = models.BooleanField(null=False, default=False) 
+    created_at = models.DateTimeField(auto_now_add=True)
+    # created_by = models.DateTimeField(auto_now_add=True)

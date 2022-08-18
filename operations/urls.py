@@ -6,8 +6,10 @@ from .views import (LoginView,
                     ScanOrder, 
                     LabInspectionListCreateAPIView,
                     SafetyCheckListCreateAPIView,
-                    OrderDetailView, 
-                    SafetyCheckListQuestionCreateAPIView, 
+                    OrderDetailView,
+                    LabResultsDetailView,
+                    SafetyCheckListQuestionCreateAPIView,
+                    LabResultsListCreateAPIView,
                     SafetyCheckListDetailAPIView)
 
 # from accounts.views import UserCreate
@@ -18,17 +20,19 @@ from .views import (LoginView,
 
 urlpatterns = [    
     
-    # path('', include(**args, **kwargs).urls),
     path("login/", LoginView.as_view(), name="login"),
+    path('order/<int:pk>/', OrderDetailView.as_view(), name="order_details"),
     path("scan-order/<int:pk>/", ScanOrder.as_view(), name="scan-order"),
-    # path("users/", UserCreate.as_view(), name="user_create"),
     path('checklist/', SafetyCheckListCreateAPIView.as_view(), name="check-list"),
     path('checklist/<int:pk>/', SafetyCheckListDetailAPIView.as_view(), name="detail-checklist"),
     path('checklist-questions/', SafetyCheckListQuestionCreateAPIView.as_view(), name="checklistquestions"),
     path('lab-inspection/', LabInspectionListCreateAPIView.as_view(), name="lab-inspection"),
-    path('order/<int:pk>/', OrderDetailView.as_view(), name="order_details"),
+    path('lab-details/',LabInspectionListCreateAPIView.as_view(), name="lab-details"),
+    path('lab-results/',LabResultsListCreateAPIView.as_view(), name="lab-results"),
+    path('lab-results/<int:pk>/',LabResultsDetailView.as_view(), name="lab-results-details"),
     
-    # path('order-new/<int:pk>/',views.OrderUpdate.as_view()),
+    # path('lab-resultsdetails/',LabResultsListCreateAPIView.as_view(), name="lab-results-details"),
+    
     # path('order-new/<int:pk>/',views.OrderUpdate.as_view()),
     
 ]
