@@ -12,13 +12,26 @@ from rest_framework.views import APIView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
-from .models import Order, SafetyChecklist, Labinspection, SafetyChecklistQuestion, LabResults
+from .models import Order, SafetyChecklist, Labinspection, SafetyChecklistQuestion, LabResultsDecision
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import LabResultsSerializer, SafetyChecklistSerializer,ScanOrderSerializer, SafetyChecklistQuestionSerializer, LabinspectionSerializer, OrderSerializer
+from .serializers import    (LabResultsDecisionSerializer, 
+                            LabResultsDecisionSerializer,
+                            LabResultsSerializer, 
+                            SafetyChecklistSerializer,
+                            ScanOrderSerializer, 
+                            SafetyChecklistQuestionSerializer, 
+                            LabinspectionSerializer, 
+                            OrderSerializer, 
+                            LoadingSerializer)
 # from customers.serializers import OrderSerializer
 from django.contrib.auth import authenticate
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
+
+
+def order_status_update(order, order_status):
+    order.order_status = order_status
+    order.save()
 
 def get_tokens_for_user(user):
     
@@ -30,7 +43,7 @@ def get_tokens_for_user(user):
         'user' : user.id
     }
 
-# Create your views here.
+
 class LoginView(APIView):
     permission_classes = ()
 
@@ -53,8 +66,7 @@ class LoginView(APIView):
 
 
 class OrderDetailView(APIView):
-    serializer_class = OrderSerializer    
-
+    serializer_class = OrderSerializer
     model = Order
 
     def get(self, request, pk=None):
@@ -63,78 +75,23 @@ class OrderDetailView(APIView):
         serializer = OrderSerializer(queryset)
         print(serializer.data)
         return Response(serializer.data)
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     order = Order.objects.get(pk = self.kwargs['pk'])
+    
 
-    #     if not order:
-    #         raise Http404
-
-    #     # continue with the rest of the method populating the context
-    #     return context
-
-# class OrderDetailAPIView(
-#     # UserQuerySetMixin, 
-#     # StaffEditorPermissionMixin,
-#     generics.RetrieveAPIView):
-#     queryset = Order.objects.all()
-#     serializer_class = OrderSerializer
-#     lookup_field = 'pk'
-
-
-
-
-# class ScanOrderViewset(viewsets.ModelViewSet):
 class ScanOrder(generics.UpdateAPIView):
     permission_classes = ()
 
     def put(self, request, pk=None):
         data = json.loads(request.body.decode('utf-8'))
         instance = get_object_or_404(Order, id=pk)
-        serializer = ScanOrderSerializer(instance, data=data)
-        # if instance.order_status == data['order_status']:
-        #     return Response(serializer.errors, status=400)
-        # else:
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=200)
-        return Response(serializer.errors, status=400)
+        serializer = ScanOrderSerializer(instance, data=data)        
+        if instance.order_status == 'PENDING':
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(serializer.data, status=200)
+        else:
+            return Response(status=400)
 
 
-@api_view(['POST'])
-def checklist(request, pk):
-    queryset = Order.objects.filter(id=pk)
-    serializer = OrderSerializer
-    questions =request.body.decode('utf-8')
-    data = json.loads(questions)
-    print(pk)
-    print(data)
-    checkist = SafetyChecklist(
-        q1=data['q1'],
-        q2=data['q2'],
-        q3=data['q3'],
-        coid=Order.objects.get(id=pk)
-    )
-    checkist.save()
-    # return request.queryset.
-    return Response(status=201)
-
-
-class OrderUpdate(UpdateView):
-    model = Order
-    fields = ['status']
-
-    def order_update(request, pk):    
-        req = request.body.decode('utf-8')
-        data = json.loads(req)
-        print(pk)
-        print(data)
-        order = Order(
-            status=data['status']
-        )
-        order.save()
-        # return request.queryset.
-        return Response(status=201)
 
 
 class SafetyCheckListQuestionCreateAPIView(generics.ListCreateAPIView):
@@ -149,7 +106,7 @@ class SafetyCheckListQuestionCreateAPIView(generics.ListCreateAPIView):
 class SafetyCheckListCreateAPIView(generics.ListCreateAPIView):
     
     serializer_class = SafetyChecklistSerializer
-    queryset = Order.objects.filter(order_status='Scanned')
+    queryset = Order.objects.filter(order_status='SAFETY')
     # lookup_field = 'pk'
     # def get_queryset(self):
     #     # print(self.request.data)
@@ -157,23 +114,21 @@ class SafetyCheckListCreateAPIView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         dList = self.request.data['questions']
-        order = Order.objects.get(id=self.request.data['order'])
+        order = get_object_or_404(Order, id=self.request.data['order'])
+        # order = Order.objects.get(id=self.request.data['order'])
         for index in range(len(dList)):
             questions_values_list=list(dList[index].values())
-            order = Order.objects.get(id=self.request.data['order'])
             checklist_choice = questions_values_list[2]
             question = SafetyChecklistQuestion.objects.get(id=questions_values_list[0])
+            update_order = order_status_update(order, 'LAB')
             SafetyChecklist.objects.create(order=order, checklist_choice=checklist_choice, question=question)
-            order.order_status = 'SAFETY'
-            order.save()
-            
+                        
 
 class SafetyCheckListDetailAPIView(generics.RetrieveAPIView):
     
     serializer_class = SafetyChecklistSerializer
     queryset = Order.objects.filter(order_status='Scanned')
-    lookup_field = 'pk'
-    
+    lookup_field = 'pk'   
 
 
 
@@ -190,22 +145,21 @@ class LabinspectionViewSet(viewsets.ModelViewSet):
 
 class LabInspectionListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = LabinspectionSerializer
-    queryset = Order.objects.filter(order_status='SAFETY')
+    queryset = Order.objects.filter(order_status='LAB')
 
 
     def perform_create(self, serializer):
         print(self.request.data)
-        order = Order.objects.get(id=self.request.data['order'])
+        order = get_object_or_404(Order, id=self.request.data['order'])
         pressure = self.request.data['truck_pressure']
         oxygen = self.request.data['oxygen_content']
         methane = self.request.data['methane_content']
-        order.order_status = 'LAB'
-        order.save()
+        update_order = order_status_update(order, 'LABRESULTS')        
         return serializer.save(order=order, pressure=pressure, oxygen=oxygen, methane=methane)
 
 class LabResultsListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = LabinspectionSerializer
-    queryset = Order.objects.filter(order_status='LAB')
+    queryset = Order.objects.filter(order_status='LABRESULTS')
 
     # def get(self, pk, *args, **kwargs):
         # print(self.request.data)
@@ -214,13 +168,9 @@ class LabResultsListCreateAPIView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         print(self.request.data)
-        # order = Order.objects.get(id=self.request.data['order'])
-        # pressure = self.request.data['truck_pressure']
-        # oxygen = self.request.data['oxygen_content']
-        # methane = self.request.data['methane_content']
-        # order.order_status = 'LAB'
-        # order.save()
-        # return serializer.save(order=order, pressure=pressure, oxygen=oxygen, methane=methane)
+        order = get_object_or_404(Order, id=self.request.data['order'])
+        update_order = order_status_update(order, self.request.data['status'])
+        return Response(status=202)
 
 class LabResultsDetailView(APIView):
     serializer_class = LabResultsSerializer    
@@ -228,8 +178,41 @@ class LabResultsDetailView(APIView):
     model = Labinspection
 
     def get(self, request, pk=None):
-        print(pk)
         queryset = Labinspection.objects.filter(order_id=pk).first()
         serializer = LabResultsSerializer(queryset)
-        print(serializer.data)        
-        return Response(serializer.data)     
+        return Response(serializer.data)    
+
+
+class LabResultsVentListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = LabinspectionSerializer
+    queryset = Order.objects.filter(order_status='VENT')
+
+    # def get(self, pk, *args, **kwargs):
+        # print(self.request.data)
+        # print(pk)
+
+
+    def perform_create(self, serializer):
+        print(self.request.data)
+        order = get_object_or_404(Order, id=self.request.data['order'])
+        update_order = order_status_update(order, 'LOADING')
+        return Response(status=202)
+
+
+class LoadingListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = LoadingSerializer
+    queryset = Order.objects.filter(order_status='LOADING')
+
+    # def get(self, pk, *args, **kwargs):
+        # print(self.request.data)
+        # print(pk)
+
+
+    def perform_create(self, serializer):
+        print(self.request.data)
+        order = get_object_or_404(Order, id=self.request.data['order'])
+        net_weight = self.request.data['net_weight']
+        tare_weight = self.request.data['tare_weight']
+        gross_weight = self.request.data['gross_weight']
+        update_order = order_status_update(order, 'LOADED')        
+        return serializer.save(order=order, tare_weight=tare_weight, net_weight=net_weight, gross_weight=gross_weight)

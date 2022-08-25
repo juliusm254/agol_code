@@ -43,29 +43,32 @@ class Driver(models.Model):
 
 class Order(models.Model):
 
-    PENDING = 'Pending'
-    SCANNED = 'Scanned'
-    STALE = 'Stale'
-    REJECTED = 'Rejected'
-    SAFETY = 'Safety'
-    LAB = 'Lab'
-    LABRESULTS = 'Labresults'
-    LOADING = 'Loading'
-    LOADED = 'Loaded'
-    RELEASED = 'Released'
-    CLOSED = 'Closed'
+    PENDING = 'PENDING'
+    SAFETY = 'SAFETY'
+    LAB = 'LAB'
+    LABRESULTS = 'LABRESULTS'
+    VENT = 'VENT'
+    SEAL = 'SEAL'    
+    LOADING = 'LOADING'
+    LOADED = 'LOADED'
+    RELEASED = 'RELEASED'
+    CLOSED = 'CLOSED'
+    REJECTED = 'REJECTED'
+    STALE = 'STALE'
     
     ORDERS_STATUS = (
-        (PENDING, 'Pending'),
-        (SCANNED, 'Scanned'),
-        (REJECTED, 'Rejected'),
+        (PENDING, 'Pending'),       
         (SAFETY, 'Safety'),
         (LAB, 'Lab'),
         (LABRESULTS, 'Labresults'),
+        (VENT, 'Vent'),
+        (SEAL, 'Seal'), 
         (LOADING, 'Loading'),
         (LOADED, 'Loaded'),
         (RELEASED, 'Released'),
         (CLOSED, 'Closed'),
+        (REJECTED, 'Rejected'),
+        (STALE, 'Stale')
     )
 
     customer = models.ForeignKey(

@@ -22,8 +22,8 @@ class ScanOrder(models.Model):
 
 class SafetyChecklistQuestion(models.Model):
     question_desc = models.CharField(max_length=255, null=False)
-    created_by = models.DateTimeField(auto_now_add=True)
-    inspection = models.ForeignKey
+    # created_by = models.DateTimeField(auto_now_add=True)
+    # inspection = models.ForeignKey
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True) 
     # created_by = models.DateTimeField(auto_now_add=True)
@@ -57,9 +57,16 @@ class Labinspection(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     # created_by = models.DateTimeField(auto_now_add=True)
 
-class LabResults(models.Model):
+class LabResultsDecision(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     vent = models.BooleanField(null=False, default=False)
     seal = models.BooleanField(null=False, default=False) 
     created_at = models.DateTimeField(auto_now_add=True)
     # created_by = models.DateTimeField(auto_now_add=True)
+
+class Loading(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    net_weight = models.FloatField(blank=False, null=True)
+    tare_weight = models.FloatField(blank=False, null=True)
+    gross_weight = models.FloatField(blank=False, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)

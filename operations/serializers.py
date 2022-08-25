@@ -2,7 +2,12 @@ from rest_framework import serializers
 from .models import ScanOrder
 from customers.serializers import VehicleSerializer, DriverSerializer, CustomerSerializer
 from customers.models import Order
-from .models import SafetyChecklist, Labinspection, SafetyChecklistQuestion, LabResults
+from .models import(Loading,
+                    LabResultsDecision,
+                    SafetyChecklist, 
+                    Labinspection, 
+                    SafetyChecklistQuestion, 
+                    )
 
 
 class SafetyChecklistSerializer(serializers.ModelSerializer):
@@ -13,6 +18,24 @@ class SafetyChecklistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['id', 'truck', 'truck_details', 'trailer', 'trailer_details']
+
+class LoadingSerializer(serializers.ModelSerializer):
+    trailer_details = VehicleSerializer(source="trailer", read_only=True)
+    truck_details = VehicleSerializer(source="truck", read_only=True)
+    read_only_fields = (
+            'truck', 'truck_details', 'trailer', 'trailer_details'
+        )
+    class Meta:
+        model = Loading
+        fields = [
+            'id',            
+            'truck_details',
+            'trailer_details',
+            'net_weight',
+            'gross_weight',
+            'tare_weight'
+        ]
+
 
 
 class LabinspectionSerializer(serializers.ModelSerializer):
@@ -106,3 +129,14 @@ class LabResultsSerializer(serializers.ModelSerializer):
                     'methane',                    
                     
                 ]
+
+class LabResultsDecisionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LabResultsDecision
+        fields = [
+            'order',
+            'vent',
+            'seal'
+        ]
+
+       

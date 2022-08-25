@@ -6,6 +6,8 @@ from .views import (LoginView,
                     ScanOrder, 
                     LabInspectionListCreateAPIView,
                     SafetyCheckListCreateAPIView,
+                    LabResultsVentListCreateAPIView,
+                    LoadingListCreateAPIView,
                     OrderDetailView,
                     LabResultsDetailView,
                     SafetyCheckListQuestionCreateAPIView,
@@ -30,6 +32,8 @@ urlpatterns = [
     path('lab-details/',LabInspectionListCreateAPIView.as_view(), name="lab-details"),
     path('lab-results/',LabResultsListCreateAPIView.as_view(), name="lab-results"),
     path('lab-results/<int:pk>/',LabResultsDetailView.as_view(), name="lab-results-details"),
+    path('lab-vent/',LabResultsVentListCreateAPIView.as_view(), name="lab-results-details"),
+    path('loading/',LoadingListCreateAPIView.as_view(), name="loading"),
     
     # path('lab-resultsdetails/',LabResultsListCreateAPIView.as_view(), name="lab-results-details"),
     
