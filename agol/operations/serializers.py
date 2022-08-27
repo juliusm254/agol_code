@@ -9,15 +9,23 @@ from .models import(Loading,
                     SafetyChecklistQuestion, 
                     )
 
-
-class SafetyChecklistSerializer(serializers.ModelSerializer):
-    trailer_details = VehicleSerializer(source="trailer", read_only=True)
-    truck_details = VehicleSerializer(source="truck", read_only=True)
+# class SafetyChecklistSerializer(serializers.Serializer):
+#     trailer_details = VehicleSerializer(source="trailer", read_only=True)
+#     truck_details = VehicleSerializer(source="truck", read_only=True)
     
-    # questions = SafetyChecklistQuestionSerializer()
-    class Meta:
-        model = Order
-        fields = ['id', 'truck', 'truck_details', 'trailer', 'trailer_details']
+#     # questions = SafetyChecklistQuestionSerializer()
+#     class Meta:
+#         model = Order
+#         fields = ['id', 'truck', 'truck_details', 'trailer', 'trailer_details']
+
+# class SafetyChecklistSerializer(serializers.ModelSerializer):
+#     trailer_details = VehicleSerializer(source="trailer", read_only=True)
+#     truck_details = VehicleSerializer(source="truck", read_only=True)
+    
+#     # questions = SafetyChecklistQuestionSerializer()
+#     class Meta:
+#         model = Order
+#         fields = ['id', 'truck', 'truck_details', 'trailer', 'trailer_details']
 
 class LoadingSerializer(serializers.ModelSerializer):
     trailer_details = VehicleSerializer(source="trailer", read_only=True)

@@ -1,15 +1,9 @@
 import json
-from multiprocessing import context
-from urllib import request
-from django.core.exceptions import ImproperlyConfigured
-from django.http import Http404
-from django.shortcuts import render
 from rest_framework import viewsets, filters, status, generics
 from rest_framework.decorators import api_view
 from django.shortcuts import render, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 from .models import Order, SafetyChecklist, Labinspection, SafetyChecklistQuestion, LabResultsDecision
@@ -17,7 +11,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import    (LabResultsDecisionSerializer, 
                             LabResultsDecisionSerializer,
                             LabResultsSerializer, 
-                            SafetyChecklistSerializer,
+                            # SafetyChecklistSerializer,
                             ScanOrderSerializer, 
                             SafetyChecklistQuestionSerializer, 
                             LabinspectionSerializer, 
@@ -25,8 +19,6 @@ from .serializers import    (LabResultsDecisionSerializer,
                             LoadingSerializer)
 # from customers.serializers import OrderSerializer
 from django.contrib.auth import authenticate
-from django.views.generic.list import ListView
-from django.views.generic.detail import DetailView
 
 
 def order_status_update(order, order_status):
@@ -103,33 +95,33 @@ class SafetyCheckListQuestionCreateAPIView(generics.ListCreateAPIView):
     #     return self.queryset
 
 
-class SafetyCheckListCreateAPIView(generics.ListCreateAPIView):
+# class SafetyCheckListCreateAPIView(generics.ListCreateAPIView):
     
-    serializer_class = SafetyChecklistSerializer
-    queryset = Order.objects.filter(order_status='SAFETY')
-    # lookup_field = 'pk'
-    # def get_queryset(self):
-    #     # print(self.request.data)
-    #     return self.queryset
+#     serializer_class = SafetyChecklistSerializer
+#     queryset = Order.objects.filter(order_status='SAFETY')
+#     # lookup_field = 'pk'
+#     # def get_queryset(self):
+#     #     # print(self.request.data)
+#     #     return self.queryset
 
-    def perform_create(self, serializer):
-        print(self.request.data)
-        dList = self.request.data['questions']
-        order = get_object_or_404(Order, id=self.request.data['order'])
-        # order = Order.objects.get(id=self.request.data['order'])
-        for index in range(len(dList)):
-            questions_values_list=list(dList[index].values())
-            checklist_choice = questions_values_list[2]
-            question = SafetyChecklistQuestion.objects.get(id=questions_values_list[0])
-            update_order = order_status_update(order, 'LAB')
-            SafetyChecklist.objects.create(order=order, checklist_choice=checklist_choice, question=question)
+#     def perform_create(self, serializer):
+#         print(self.request.data)
+#         dList = self.request.data['questions']
+#         order = get_object_or_404(Order, id=self.request.data['order'])
+#         # order = Order.objects.get(id=self.request.data['order'])
+#         for index in range(len(dList)):
+#             questions_values_list=list(dList[index].values())
+#             checklist_choice = questions_values_list[2]
+#             question = SafetyChecklistQuestion.objects.get(id=questions_values_list[0])
+#             update_order = order_status_update(order, 'LAB')
+#             SafetyChecklist.objects.create(order=order, checklist_choice=checklist_choice, question=question)
                         
 
-class SafetyCheckListDetailAPIView(generics.RetrieveAPIView):
+# class SafetyCheckListDetailAPIView(generics.RetrieveAPIView):
     
-    serializer_class = SafetyChecklistSerializer
-    queryset = Order.objects.filter(order_status='Scanned')
-    lookup_field = 'pk'   
+#     serializer_class = SafetyChecklistSerializer
+#     queryset = Order.objects.filter(order_status='Scanned')
+#     lookup_field = 'pk'   
 
 
 

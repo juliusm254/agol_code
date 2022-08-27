@@ -12,9 +12,10 @@ from .views import (LoginView,
                     LabResultsDetailView,
                     SafetyCheckListQuestionCreateAPIView,
                     LabResultsListCreateAPIView,
-                    SafetyCheckListDetailAPIView)
+                    # SafetyCheckListDetailAPIView
+                    )
 
-from .api import ChecklistCreateApi
+from .api import ChecklistCreateApi, ChecklistListApi, ChecklistDetailApi
 
 # from accounts.views import UserCreate
 
@@ -28,8 +29,11 @@ urlpatterns = [
     path('order/<int:pk>/', OrderDetailView.as_view(), name="order_details"),
     path("scan-order/<int:pk>/", ScanOrder.as_view(), name="scan-order"),
     # path('checklist/', SafetyCheckListCreateAPIView.as_view(), name="check-list"),
-    path('checklist/', ChecklistCreateApi.as_view(), name="check-list"),    
-    path('checklist/<int:pk>/', SafetyCheckListDetailAPIView.as_view(), name="detail-checklist"),
+    path('checklistcreate/', ChecklistCreateApi.as_view(), name="check-list"),    
+    path('checklist/', ChecklistListApi.as_view(), name="check-list"),    
+    path('checklist/<int:pk>/', ChecklistDetailApi.as_view(), name="detail-checklist"),
+    
+    # path('checklist/<int:pk>/', SafetyCheckListDetailAPIView.as_view(), name="detail-checklist"),
     path('checklist-questions/', SafetyCheckListQuestionCreateAPIView.as_view(), name="checklistquestions"),
     path('lab-inspection/', LabInspectionListCreateAPIView.as_view(), name="lab-inspection"),
     path('lab-details/',LabInspectionListCreateAPIView.as_view(), name="lab-details"),
