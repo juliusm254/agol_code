@@ -26,6 +26,41 @@ from .models import(Loading,
 #     class Meta:
 #         model = Order
 #         fields = ['id', 'truck', 'truck_details', 'trailer', 'trailer_details']
+class ChecklistDetailSerializer(serializers.Serializer):
+    
+    
+    def get_checklist_details(pk):
+    
+    feed_ids = [feed_item.id for feed_item in feed]
+
+    # Refetch items with more optimizations
+    # Based on the relations that are going in
+    objects = FeedItem.objects.select_related(
+      # ... as complex as you want ...
+    ).prefetch_related(
+      # ... as complex as you want ...
+    ).filter(
+      id__in=feed_ids
+    ).order_by(
+      "-some_timestamp"
+    )
+    SafetyChecklist.objects.select_related('order').filter(order_id=pk)
+
+    some_cache = get_some_cache(feed_ids)
+
+    result = []
+
+    for feed_item in objects:
+        # An example, adding additional fields for the serializer
+        # That are based on values outside of our current object
+        # This may be some optimization to save queries
+        feed_item._calculated_field = some_cache.get(feed_item.id)
+
+        result.append(FeedItemSerializer(feed_item).data)
+
+    return result
+
+
 
 class LoadingSerializer(serializers.ModelSerializer):
     trailer_details = VehicleSerializer(source="trailer", read_only=True)

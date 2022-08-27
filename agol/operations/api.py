@@ -1,6 +1,8 @@
 from rest_framework import status, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from customers.serializers import OrderSerializer
 from .services import checklist_create
 from .selectors import order_list, checklist_details
 from .serializers import VehicleSerializer
@@ -42,13 +44,25 @@ class ChecklistListApi(APIView):
 
 class ChecklistDetailApi(APIView):
     class OutputSerializer(serializers.Serializer):
-        id = serializers.CharField()
-        trailer_details = VehicleSerializer(source="trailer", read_only=True)
-        truck_details = VehicleSerializer(source="truck", read_only=True)
+        order_id = serializers.CharField()
+        # truck = OrderSerializer(source="id", read_only=True)
+        checklist_choice = serializers.CharField()
+        question_id = serializers.IntegerField()
+        trailer_details = OrderSerializer(source="trailer_id", read_only=True)
+        # truck_id = serializers.PrimaryKeyRelatedField(read_only=True)
+        # truck_id = VehicleSerializer( read_only=True)
 
 
     def get(self, request, pk=None):
-        serializer = self.OutputSerializer(checklist_details(pk))
+        serializer = self.OutputSerializer(checklist_details(pk), many=True)
         print(serializer.data)
         return Response(serializer.data)
+
+class ChecklistDetailApi(APIView):
+    def get(self, request, pk=None):
+        
+
+        data = get_checklist_details(pk)
+
+        return Response(data)
 
