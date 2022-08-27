@@ -69,7 +69,7 @@ methods: {
       <!-- <input type="radio" id="yes" value="True" v-model="choice"> -->
       <label for="yes">Yes</label>
       <br>
-      <input type="radio" :id="question.id" value="No" :name="question.id" v-model="question.value" >
+      <input type="radio" :id="question.id" value="No" :name="question.id" v-model="question.value" checked >
       <label for="no">No</label>
     </div>
      

@@ -80,6 +80,7 @@ class ScanOrderSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data, *args, **kwargs):
         request_status = validated_data.pop("order_status")
+        print(request_status)
         if instance.order_status != request_status:
             instance.order_status = request_status
             instance.save()

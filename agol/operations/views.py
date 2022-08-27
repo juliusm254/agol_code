@@ -113,6 +113,7 @@ class SafetyCheckListCreateAPIView(generics.ListCreateAPIView):
     #     return self.queryset
 
     def perform_create(self, serializer):
+        print(self.request.data)
         dList = self.request.data['questions']
         order = get_object_or_404(Order, id=self.request.data['order'])
         # order = Order.objects.get(id=self.request.data['order'])

@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from django.contrib.auth.models import User
 from django.db import models
@@ -70,3 +71,11 @@ class Loading(models.Model):
     tare_weight = models.FloatField(blank=False, null=True)
     gross_weight = models.FloatField(blank=False, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+#TO DO
+# class BaseModel(models.Model)
+#     created_at = models.DateTimeField(db_index=True, default=timezone.now)
+#     updated_at = models.DateTimeField(auto_now=True)
+
+#     class Meta:
+#         abstract = True

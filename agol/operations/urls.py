@@ -5,7 +5,7 @@ from django.urls import path, include
 from .views import (LoginView, 
                     ScanOrder, 
                     LabInspectionListCreateAPIView,
-                    SafetyCheckListCreateAPIView,
+                    # SafetyCheckListCreateAPIView,
                     LabResultsVentListCreateAPIView,
                     LoadingListCreateAPIView,
                     OrderDetailView,
@@ -13,6 +13,8 @@ from .views import (LoginView,
                     SafetyCheckListQuestionCreateAPIView,
                     LabResultsListCreateAPIView,
                     SafetyCheckListDetailAPIView)
+
+from .api import ChecklistCreateApi
 
 # from accounts.views import UserCreate
 
@@ -25,7 +27,8 @@ urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
     path('order/<int:pk>/', OrderDetailView.as_view(), name="order_details"),
     path("scan-order/<int:pk>/", ScanOrder.as_view(), name="scan-order"),
-    path('checklist/', SafetyCheckListCreateAPIView.as_view(), name="check-list"),
+    # path('checklist/', SafetyCheckListCreateAPIView.as_view(), name="check-list"),
+    path('checklist/', ChecklistCreateApi.as_view(), name="check-list"),    
     path('checklist/<int:pk>/', SafetyCheckListDetailAPIView.as_view(), name="detail-checklist"),
     path('checklist-questions/', SafetyCheckListQuestionCreateAPIView.as_view(), name="checklistquestions"),
     path('lab-inspection/', LabInspectionListCreateAPIView.as_view(), name="lab-inspection"),
